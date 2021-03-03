@@ -1,0 +1,758 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Making your first Phaser 3 Game - Part 1</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+	pixelArt: true,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+    var game = new Phaser.Game(config);
+	var score = 0;
+	var level = 1;
+	var life = 3;
+	var lifeText;
+    var scoreText;
+	var heightText;
+	var levelText;
+	var spaceBar;
+	var music;
+    var slow=false;
+    function preload ()
+    {
+    this.load.image('sky', 'assets/background.png');
+    this.load.image('platform', 'assets/wood.png');
+	//this.load.image('platform', 'assets/platform.png');
+	this.load.image('platform1', 'assets/platform1.png');
+	this.load.image('platform2', 'assets/platform2.png');
+	//this.load.image('platform3', 'assets/Level4.png');
+	this.load.image('rocket', 'assets/rocket.png');
+	this.load.image('egg', 'assets/egg.png');
+	this.load.image('flag', 'assets/flag.png');
+	//Level1
+	this.load.image('level1-1', 'assets/Level1-1.png')
+	this.load.image('level1-2', 'assets/Level1-2.png')
+	this.load.image('level3', 'assets/Level3.png');
+	this.load.image('level9', 'assets/Level9.png');
+
+    this.load.spritesheet('dude', 
+        'assets/rabbit.png',
+        { frameWidth: 29, frameHeight: 32}
+    );
+	this.load.spritesheet('enemy1', 'assets/enemy1.png', { frameWidth: 37, frameHeight: 45 });
+	this.load.spritesheet('boom', 'assets/explosion.png', { frameWidth: 64, frameHeight: 64, endFrame: 23 });
+	this.load.atlas('flares', 'assets/flares.png', 'assets/flares.json');
+    // this.load.spritesheet('particle', 'assets/snowflakes.png', { frameWidth: 17, frameHeight: 17});
+    //this.load.spritesheet('snowflakes_large', 'assets/snowflakes_large.png', { frameWidth: 64, frameHeight: 64});
+    }
+
+    function create ()
+{
+    this.cameras.main.setBounds(0, 0, 800, 5400);
+    this.physics.world.setBounds(0, 0, 800, 5400);
+	this.add.image(400, 2700, 'sky');
+	this.power=0;   
+	
+	//Create all the platforms
+	platforms = this.physics.add.staticGroup();
+
+    var mainLevel9 = [
+        '                 ',
+        '       x         ',
+        '             x   ',
+        ' x               ',
+        '                 ',
+        '             x   ',
+        '                 ',
+        'x        x      x',
+        '                 ',
+        '           x     '
+    ];
+
+    var width = mainLevel9[0].length*60;
+    var height = (mainLevel9.length)*60;
+
+    for (var y = 0; y < mainLevel9.length; y++) {
+        for (var x = 0; x < mainLevel9[y].length; x++) {
+            if (mainLevel9[y][x] == 'x') {
+                platforms.create(60*x, 60*y, 'level9').setScale(0.5,0.5).refreshBody();
+            }
+        }
+    }
+
+    var mainLevel9 = [
+        '                 ',
+        '       x         ',
+        '             x   ',
+        ' x               ',
+        '                 ',
+        '             x   ',
+        '                 ',
+        'x        x      x',
+        '                 ',
+        '           x     '
+    ];
+
+    var width = mainLevel9[0].length*60;
+    var height = (mainLevel9.length)*60;
+
+    for (var y = 0; y < mainLevel9.length; y++) {
+        for (var x = 0; x < mainLevel9[y].length; x++) {
+            if (mainLevel9[y][x] == 'x') {
+                platforms.create(60*x, 60*y+600, 'level9').setScale(0.5,0.5).refreshBody();
+            }
+        }
+    }
+	
+	 //level1
+	platforms.create(100, 5300, 'level1-1').setScale(1.5,1.5).refreshBody();
+	platforms.create(700, 5300, 'level1-1').setScale(-1.5,1.5).refreshBody();
+	platforms.create(400, 5000, 'level1-2').setScale(1,1).refreshBody();
+	/*
+	platforms.create(200, 5000, 'platform1').setScale(0.22, 0.69).refreshBody();
+	platforms.create(100, 5300, 'platform1').setScale(0.25, 0.1).refreshBody();
+    platforms.create(600, 5300, 'platform1').setScale(0.25, 0.1).refreshBody();
+	platforms.create(0, 5200, 'platform1').setScale(0.25, 0.1).refreshBody();
+	platforms.create(700, 5200, 'platform1').setScale(0.25, 0.1).refreshBody();
+    platforms.create(400, 5100, 'platform1').setScale(0.25, 0.1).refreshBody();
+    platforms.create(50, 5000, 'platform1').setScale(0.25, 0.1).refreshBody();
+    platforms.create(600, 5000, 'platform1').setScale(0.25, 0.1).refreshBody();
+	platforms.create(400, 4925, 'platform1').setScale(0.25, 0.1).refreshBody();
+    platforms.create(0, 4850, 'platform1').setScale(0.25, 0.1).refreshBody();
+    platforms.create(700, 4850, 'platform1').setScale(0.25, 0.1).refreshBody();
+	*/
+
+
+    //level2
+	platforms.create(600, 4800, 'level1-2').setScale(1,1).refreshBody();
+	platforms.create(750, 4600, 'level1-2').setScale(1,1).refreshBody();
+	platforms.create(450, 4600, 'level1-2').setScale(0.8,1).refreshBody();
+	platforms.create(250, 4450, 'level1-2').setScale(0.8,1.5).refreshBody();
+	platforms.create(0, 4350, 'level1-2').setScale(0.8,1.5).refreshBody();
+	/*
+	platforms.create(100, 4750, 'platform2').setScale(0.7,1).refreshBody();
+    platforms.create(600, 4750, 'platform2').setScale(0.7,1).refreshBody();
+	platforms.create(0, 4650, 'platform2').setScale(0.7,1).refreshBody();
+	platforms.create(700, 4650, 'platform2').setScale(0.8,1).refreshBody();
+    platforms.create(400, 4550, 'platform2').setScale(0.8,1).refreshBody();
+    platforms.create(50, 4450, 'platform2').setScale(0.8,1).refreshBody();
+    platforms.create(600, 4450, 'platform2').setScale(0.8,1).refreshBody();
+	platforms.create(400, 4375, 'platform2').setScale(0.8,1).refreshBody();
+    platforms.create(0, 4250, 'platform2').setScale(0.8,1).refreshBody();
+    platforms.create(700, 4250, 'platform2').setScale(0.8,1).refreshBody();
+	*/
+
+    //level3
+	platforms.create(400, 4150, 'level3').setScale(0.6,0.6).refreshBody();
+	platforms.create(600, 4150, 'level3').setScale(0.6,0.6).refreshBody();
+	platforms.create(500, 4050, 'level3').setScale(1,1).refreshBody();
+	platforms.create(800, 4100, 'level3').setScale(0.8,0.8).refreshBody();
+	platforms.create(450, 3900, 'level3').setScale(1,1).refreshBody();
+	/*
+	platforms.create(100, 4150, 'platform3').setScale(0.7,0.3).refreshBody();
+    platforms.create(600, 4150, 'platform3').setScale(0.7,0.3).refreshBody();
+	platforms.create(0, 4050, 'platform3').setScale(0.7,0.3).refreshBody();
+	platforms.create(700, 4050, 'platform3').setScale(0.7,0.3).refreshBody();
+    platforms.create(400, 3950, 'platform3').setScale(0.7,0.3).refreshBody();
+    platforms.create(50, 3850, 'platform3').setScale(0.7,0.3).refreshBody();
+    platforms.create(600, 3850, 'platform3').setScale(0.7,0.3).refreshBody();
+	platforms.create(400, 3775, 'platform3').setScale(0.7,0.3).refreshBody();
+    platforms.create(0, 3650, 'platform3').setScale(0.7,0.3).refreshBody();
+    platforms.create(700, 3650, 'platform3').setScale(0.7,0.3).refreshBody();
+	*/
+
+    //level4
+	platforms.create(100, 3550, 'platform').setScale(0.6,1).refreshBody();
+    platforms.create(600, 3550, 'platform').setScale(0.6,1).refreshBody();
+	platforms.create(0, 3450, 'platform').setScale(0.6,1).refreshBody();
+	platforms.create(700, 3450, 'platform').setScale(0.6,1).refreshBody();
+    platforms.create(400, 3350, 'platform').setScale(0.6,1).refreshBody();
+    platforms.create(50, 3250, 'platform').setScale(0.6,1).refreshBody();
+    platforms.create(600, 3250, 'platform').setScale(0.6,1).refreshBody();
+	platforms.create(400, 3175, 'platform').setScale(0.6,1).refreshBody();
+    platforms.create(0, 3050, 'platform').setScale(0.6,1).refreshBody();
+    platforms.create(700, 3050, 'platform').setScale(0.6,1).refreshBody();
+
+    //level5
+	platforms.create(100, 2950, 'platform').setScale(0.5,1).refreshBody();
+    platforms.create(600, 2950, 'platform').setScale(0.5,1).refreshBody();
+	platforms.create(0, 2850, 'platform').setScale(0.5,1).refreshBody();
+	platforms.create(700, 2850, 'platform').setScale(0.5,1).refreshBody();
+    platforms.create(400, 2750, 'platform').setScale(0.5,1).refreshBody();
+    platforms.create(50, 2650, 'platform').setScale(0.5,1).refreshBody();
+    platforms.create(600, 2650, 'platform').setScale(0.5,1).refreshBody();
+	platforms.create(400, 2575, 'platform').setScale(0.5,1).refreshBody();
+    platforms.create(0, 2450, 'platform').setScale(0.5,1).refreshBody();
+    platforms.create(700, 2450, 'platform').setScale(0.5,1).refreshBody();
+
+    //level6
+	platforms.create(100, 2350, 'platform').setScale(0.4,1).refreshBody();
+    platforms.create(600, 2350, 'platform').setScale(0.4,1).refreshBody();
+	platforms.create(0, 2250, 'platform').setScale(0.4,1).refreshBody();
+	platforms.create(700, 2250, 'platform').setScale(0.4,1).refreshBody();
+    platforms.create(400, 2150, 'platform').setScale(0.4,1).refreshBody();
+    platforms.create(50, 2050, 'platform').setScale(0.4,1).refreshBody();
+    platforms.create(600, 2050, 'platform').setScale(0.4,1).refreshBody();
+	platforms.create(400, 1975, 'platform').setScale(0.4,1).refreshBody();
+    platforms.create(0, 1850, 'platform').setScale(0.4,1).refreshBody();
+    platforms.create(700, 1850, 'platform').setScale(0.4,1).refreshBody();
+
+    //level7
+	platforms.create(100, 1750, 'platform').setScale(0.3,1).refreshBody();
+    platforms.create(600, 1750, 'platform').setScale(0.3,1).refreshBody();
+	platforms.create(0, 1650, 'platform').setScale(0.3,1).refreshBody();
+	platforms.create(700, 1650, 'platform').setScale(0.3,1).refreshBody();
+    platforms.create(400, 1550, 'platform').setScale(0.3,1).refreshBody();
+    platforms.create(50, 1450, 'platform').setScale(0.3,1).refreshBody();
+    platforms.create(600, 1450, 'platform').setScale(0.3,1).refreshBody();
+	platforms.create(400, 1375, 'platform').setScale(0.3,1).refreshBody();
+    platforms.create(0, 1250, 'platform').setScale(0.3,1).refreshBody();
+    platforms.create(700, 1250, 'platform').setScale(0.3,1).refreshBody();
+    /*
+        //level8
+        platforms.create(100, 1150, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(600, 1150, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(0, 1050, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(700, 1050, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(400, 950, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(50, 850, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(600, 850, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(400, 775, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(0, 650, 'platform').setScale(0.2,1).refreshBody();
+        platforms.create(700, 650, 'platform').setScale(0.2,1).refreshBody();
+
+        //level9
+        platforms.create(100, 550, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(600, 550, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(0, 450, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(700, 450, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(400, 350, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(50, 250, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(600, 250, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(400, 175, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(0, 50, 'platform').setScale(0.1,1).refreshBody();
+        platforms.create(700, 50, 'platform').setScale(0.1,1).refreshBody();
+    */
+
+//Create the moveable platform
+        for( let i=0; i<6; i++) {
+            platforms3 = this.physics.add.image(400 , 340+600*i, 'platform')
+                .setImmovable(true)
+                .setVelocity(80, -80)
+                .setScale(0.5, 1.0);
+            platforms3.body.setAllowGravity(false);
+
+            this.tweens.timeline({
+                targets: platforms3.body.velocity,
+                loop: -1,
+                tweens: [
+                    { x:    -200, y: 0, duration: 6000, ease: 'Stepped' },
+                    { x:   200, y: 0, duration: 6000, ease: 'Stepped' }
+                ]
+            });
+            this.physics.add.collider(player, platforms3);
+        }
+	
+	//create the bunny
+	player = this.physics.add.sprite(400, 0, 'dude');
+    player.setBounce(0.2);
+    player.setCollideWorldBounds(true);
+    
+    this.anims.create({
+    key: 'left',
+    frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 2 }), 
+    frameRate: 10,
+    repeat: -1
+    });
+
+    this.anims.create({
+    key: 'turn',
+    frames: [ { key: 'dude', frame: 3 } ],
+    frameRate: 20
+    });
+
+    this.anims.create({
+    key: 'right',
+    frames: this.anims.generateFrameNumbers('dude', { start: 4, end: 6 }), 
+    frameRate: 10,
+    repeat: -1
+    });
+	
+	//Use the arrow keys to control the rabbit
+    cursors = this.input.keyboard.addKeys(
+         {
+          left:Phaser.Input.Keyboard.KeyCodes.LEFT,
+          right:Phaser.Input.Keyboard.KeyCodes.RIGHT});
+	spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+	
+	//create the good eggs for the rocket effect
+    rocketeggs = this.physics.add.group();
+	  rocketeggs.create(350, 5300, 'egg').setScale(0.02,0.02);
+	  rocketeggs.create(700, 4400, 'egg').setScale(0.02,0.02);
+	  rocketeggs.create(700, 1600, 'egg').setScale(0.02,0.02);
+	rocketeggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(rocketeggs, platforms);
+	this.physics.add.overlap(player, rocketeggs, rocketEgg, null, this);
+	this.physics.add.collider(player, platforms);
+	
+	rockets = this.physics.add.group();
+	this.physics.add.collider(player, rockets);
+	
+	
+	//create the good eggs for the fast effect
+	fasteggs = this.physics.add.group();
+	  fasteggs.create(200, 5300, 'egg').setScale(0.02,0.02);
+	  fasteggs.create(300, 5000, 'egg').setScale(0.02,0.02);
+      fasteggs.create(700, 4200, 'egg').setScale(0.02,0.02);
+      fasteggs.create(700, 1000, 'egg').setScale(0.02,0.02);	  
+	fasteggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(fasteggs, platforms);
+	this.physics.add.overlap(player, fasteggs, fastEgg, null, this);
+	
+	//create the good eggs for the fast effect
+	lifeeggs = this.physics.add.group();
+	  lifeeggs.create(100, 5300, 'egg').setScale(0.02,0.02);
+	  lifeeggs.create(700, 3600, 'egg').setScale(0.02,0.02);
+      lifeeggs.create(100, 2300, 'egg').setScale(0.02,0.02);	  
+	lifeeggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(lifeeggs, platforms);
+	this.physics.add.overlap(player, lifeeggs, lifeEgg, null, this);
+	
+	//create the good eggs for the ballon effect
+    balloneggs = this.physics.add.group();
+	  balloneggs.create(400, 2700, 'egg').setScale(0.02,0.02);
+	balloneggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(balloneggs, platforms);
+	this.physics.add.overlap(player, balloneggs, ballonEgg, null, this);
+	this.physics.add.collider(player, platforms);
+	
+	
+	//create the bad eggs for the enmey1 effect
+	enemy1eggs = this.physics.add.group();
+	  enemy1eggs.create(400, 5300, 'egg').setScale(0.02,0.02);
+	  enemy1eggs.create(100, 2900, 'egg').setScale(0.02,0.02);
+      enemy1eggs.create(700, 2200, 'egg').setScale(0.02,0.02);
+      enemy1eggs.create(400, 1300, 'egg').setScale(0.02,0.02);	  
+	enemy1eggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(enemy1eggs, platforms);
+	this.physics.add.overlap(player, enemy1eggs, enemy1Egg, null, this);
+	enemies = this.physics.add.group();
+	this.physics.add.collider(enemies, platforms);
+	this.physics.add.overlap(player, enemies, hitEnemy, null, this);
+
+	
+	//Create the bad eggs for the slow jumping
+	sloweggs = this.physics.add.group();
+    sloweggs.create(100, 0, 'egg').setScale(0.02,0.02);
+	  sloweggs.create(500, 5300, 'egg').setScale(0.02,0.02);
+	  sloweggs.create(50, 4600, 'egg').setScale(0.02,0.02);
+	  sloweggs.create(50, 3300, 'egg').setScale(0.02,0.02);
+	  sloweggs.create(400, 1900, 'egg').setScale(0.02,0.02);
+	sloweggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(sloweggs, platforms);
+	this.physics.add.overlap(player, sloweggs, slowEgg, null, this);
+	
+	//Create the bad eggs for the explosion
+	bombeggs = this.physics.add.group();
+	  bombeggs.create(600, 5300, 'egg').setScale(0.02,0.02);
+	  bombeggs.create(50, 4000, 'egg').setScale(0.02,0.02);
+	  bombeggs.create(400, 3100, 'egg').setScale(0.02,0.02);
+	  bombeggs.create(100, 1700, 'egg').setScale(0.02,0.02);
+	  bombeggs.create(600, 400, 'egg').setScale(0.02,0.02);
+	bombeggs.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(bombeggs, platforms);
+	this.physics.add.overlap(player, bombeggs, bombEgg, null, this).name = 'boomegg_collider';
+	bombs = this.physics.add.group();
+	this.physics.add.collider(bombs, platforms);
+	this.physics.add.overlap(player, bombs, hitBoom, null, this).name = 'boom_collider';
+	
+	//create the flag for the level
+	flags = this.physics.add.group();
+	flags.create(700, 5300, 'flag').setScale(0.07,0.07);
+	flags.create(700, 4800, 'flag').setScale(0.07,0.07);
+    flags.create(400, 4300, 'flag').setScale(0.07,0.07); 
+    flags.create(600, 3800, 'flag').setScale(0.07,0.07); 
+    flags.create(700, 3200, 'flag').setScale(0.07,0.07); 
+    flags.create(100, 2600, 'flag').setScale(0.07,0.07); 
+    flags.create(600, 2000, 'flag').setScale(0.07,0.07); 
+    flags.create(600, 1400, 'flag').setScale(0.07,0.07); 
+    flags.create(610, 800, 'flag').setScale(0.07,0.07); 
+    flags.create(700, 10, 'flag').setScale(0.07,0.07); 	
+	flags.children.iterate(function (child) {
+	child.setCollideWorldBounds(true);
+    });
+    this.physics.add.collider(flags, platforms);
+	this.physics.add.overlap(player, flags, flagLevel, null, this);
+	
+	//Create the UI Interface
+    scoreText = this.add.text(16, 16, 'Easter Eggs: 0', { fontSize: '24px', fill: '#FFF' });
+      scoreText.setScrollFactor(0);
+	heightText = this.add.text(290, 16, 'Height: 0', { fontSize: '24px', fill: '#FFF' });
+      heightText.setScrollFactor(0);
+	levelText = this.add.text(470, 16, 'Level: 1', { fontSize: '24px', fill: '#FFF' });
+      levelText.setScrollFactor(0);
+	lifeText = this.add.text(650, 16, 'Life: 2', { fontSize: '24px', fill: '#FFF' });
+	  lifeText.setScrollFactor(0);
+    
+    //measure the jumping time
+    this.input.on('pointerdown', startJump, this);
+    this.input.on('pointerup', endJump, this); 
+   
+
+
+   //Camera follows the bunny
+   this.cameras.main.startFollow(player, true, 0.2, 0.2);
+   this.cameras.main.setZoom(1);
+   this.physics.world.setFPS( this.physics.world.fps / 4 );
+   this.tweens.timeScale *= 4;
+   this.physics.world.timeScale = 1.0;
+   
+   var particles1 = this.add.particles('flares');
+    particles1.createEmitter({
+    frame: 'blue',
+    x: { min: 1, max: 800 },
+    y: 0,
+    lifespan: 1200,
+    speedY: { min: 200, max: 400 },
+    gravityY: 100,
+    gravityX: Phaser.Math.Between(100, 200),
+    scale: { start: 0.1, end: 0.2 },
+    quantity: 4,
+    blendMode: 'ADD'
+    });
+    particles1.setDepth(1);
+
+    var particles2 = this.add.particles('flares');
+    particles2.createEmitter({
+    frame: 'blue',
+    x: { min: 1, max: 800 },
+    y: 600,
+    lifespan: 1200,
+    speedY: { min: 200, max: 400 },
+    gravityY: 100,
+    gravityX: Phaser.Math.Between(100, 200),
+    scale: { start: 0.1, end: 0.2 },
+    quantity: 4,
+    blendMode: 'ADD'
+    });
+    particles2.setDepth(1);
+
+    var particles3 = this.add.particles('flares');
+    particles3.createEmitter({
+    frame: 'blue',
+    x: { min: 1, max: 800 },
+    y: 1200,
+    lifespan: 1200,
+    speedY: { min: 200, max: 400 },
+    gravityY: 100,
+    gravityX: Phaser.Math.Between(100, 200),
+    scale: { start: 0.1, end: 0.2 },
+    quantity: 4,
+    blendMode: 'ADD'
+    });
+    particles3.setDepth(1);
+
+ //   timer = game.time.create(false);
+ //  Set a TimerEvent to occur after 2 seconds
+  //  timer.loop(1000, updateCounter, this);
+  //  timer.start();
+//  Start the timer running - this is important!
+//  It won't start automatically, allowing you to hook it to button events and the like.
+}
+
+    function update ()
+    {
+	    var y;
+		y= Math.floor(5352 - player.y);
+        heightText.setText('Height: ' + y);
+	    if (cursors.left.isDown && slow==false )
+        {
+            player.setVelocityX(-160);
+            player.anims.play('left', true);
+        }
+        else if (cursors.right.isDown && slow==false)
+        {
+            player.setVelocityX(160);
+            player.anims.play('right', true);
+        }
+        else if (player.body.touching.down) 
+        {
+            player.setVelocityX(0);
+            player.anims.play('turn');
+        }
+		if (player.body.velocity.y > 80) {
+		player.setVelocityX(0);
+		player.anims.play('turn');
+		}
+		if (spaceBar.isDown ){
+         this.scene.restart();
+       }
+        if (cursors.left.isDown && slow==true )
+        {
+            player.setVelocityX(-80);
+            player.anims.play('left', true);
+        }
+        if (cursors.right.isDown && slow==true )
+        {
+            player.setVelocityX(80);
+            player.anims.play('left', true);
+        }
+	   //add the wind effect when player is jumping
+        if (5352-player.y>3600){
+        effect();
+       }
+    }
+	
+    function rocketEgg (player, rocketeggs)
+	{
+    rocketeggs.disableBody(true, true);
+    score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+    var rocket = rockets.create(rocketeggs.x, rocketeggs.y+300, 'rocket');
+        rocket.setImmovable(true);
+        rocket.setVelocity(20, -20);
+        rocket.setScale(0.25, 0.25);
+        rocket.allowGravity = false;
+	    this.tweens.timeline({
+        targets: rocket.body.velocity,
+        loop: 0,
+        tweens: [
+         { x:0, y: -200, duration: 10000, ease: 'Stepped' }
+        ]
+        });
+    }
+	
+	 function ballonEgg (player, balloneggs)
+	{
+    balloneggs.disableBody(true, true);
+    score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+    var rocket = rockets.create(balloneggs.x, balloneggs.y, 'rocket');
+        rocket.setImmovable(true);
+        rocket.setVelocity(20, -20);
+        rocket.setScale(0.25, 0.25);
+        rocket.allowGravity = false;
+	    this.tweens.timeline({
+        targets: rocket.body.velocity,
+        loop: 0,
+        tweens: [
+         { x:0, y: -200, duration: 10000, ease: 'Stepped' }
+        ]
+        });
+    }
+	
+	function fastEgg (player, fasteggs)
+	{
+    fasteggs.disableBody(true, true);
+    score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+	
+    }
+	
+	function lifeEgg (player, lifeeggs)
+	{
+    lifeeggs.disableBody(true, true);
+    score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+    if (life < 3) {
+	life += 1;
+    lifeText.setText('Life: ' + life);
+	}
+    }
+	
+	function slowEgg (player, sloweggs)
+	{
+    sloweggs.disableBody(true, true);
+    slow=true;
+    score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+    
+	}
+	
+	function enemy1Egg (player, enemy1eggs)
+	{
+	enemy1eggs.disableBody(true, true);
+    score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+	var timedEvent = this.time.delayedCall(3000, onEvent, [], this);
+	function onEvent()
+    { 
+    var mummyAnimation = this.anims.create({
+        key: 'walk',
+        frames: this.anims.generateFrameNumbers('enemy1'),
+        frameRate: 16,
+        repeat: 0
+    });
+    var mummy = enemies.create(enemy1eggs.x, enemy1eggs.y-10, 'enemy1');
+    mummy.play('walk');
+    mummy.anims.setRepeat(7);
+	mummy.collideWorldBounds = true;
+    this.tweens.add({
+        targets: mummy,
+        x: 900,
+        duration: 20000,
+        ease: 'Linear'
+    });
+	}
+	}
+	
+	function bombEgg (player, bombeggs)
+	{
+	score += 1;
+    scoreText.setText('Easter Eggs: ' + score);
+	//Shake the bad eggs
+	this.physics.world.colliders.getActive().find(function(i){
+    return i.name == 'boomegg_collider'
+    }).destroy();
+	var min = -2;
+    var max = 2;
+    bombeggs.x+= Math.floor(Math.random() * (max - min + 1)) + min;
+    bombeggs.y+= Math.floor(Math.random() * (max - min + 1)) + min;
+	//Show the explosion
+	var timedEvent = this.time.delayedCall(2000, onEvent, [], this);
+	function onEvent()
+    {
+	bombeggs.disableBody(true, true);
+    var config = {
+        key: 'explode',
+        frames: this.anims.generateFrameNumbers('boom', { start: 0, end: 23, first: 23 }),
+        frameRate: 5
+    };
+    this.anims.create(config);
+    //var boom = this.add.sprite(bombeggs.x, bombeggs.y, 'boom');
+	var boom = bombs.create(bombeggs.x, bombeggs.y-15, 'boom');
+    boom.anims.play('explode');
+	boom.collideWorldBounds = true;
+    }
+	}
+
+	function hitBoom (player, boom)
+   {
+    player.anims.play('turn');
+	life -= 1;
+	lifeText.setText('Life: ' + life);
+	this.physics.world.colliders.getActive().find(function(i){
+    return i.name == 'boom_collider'
+    }).destroy();
+	if (life == 0) {
+	player.setTint(0xff0000);
+	this.physics.pause();
+	gameOver = true;
+	}
+    }
+	
+	function hitEnemy (player, sprite)
+   {
+    player.anims.play('turn');
+	life -= 1;
+	lifeText.setText('Life: ' + life);
+	if (life == 0) {
+	player.setTint(0xff0000);
+	this.physics.pause();
+	gameOver = true;
+	}
+    }
+	
+    function flagLevel(player, flags)
+	{
+    flags.disableBody(true, true);
+    level += 1;
+    levelText.setText('Level: ' + level);
+    }
+	
+    function startJump() 
+	{  if(player.body.touching.down){
+
+        this.timer = this.time.addEvent({
+            delay: 100,
+            callback: tick,
+            callbackScope: this,
+            loop: true
+        });
+    }
+
+    }
+	function endJump() 
+	{
+        this.timer.remove();
+		if(this.power * 500 <= 330)
+		{
+		player.setVelocityY(- this.power * 500);
+        this.power = 0;
+		}
+		else {
+		player.setVelocityY(-330);
+		this.power = 0;
+		}
+    }
+	function tick() 
+	{
+            this.power += .1;
+    }
+	
+	//effect for jumping
+    function effect(){
+        //effect happens when the player leave the ground
+        if(!player.body.touching.down)
+        {
+            // wind speed is -50
+            if (cursors.left.isDown)
+        {
+            player.setVelocityX(-160+50);
+            player.anims.play('left', true);
+        }
+           else if (cursors.right.isDown)
+        {
+            player.setVelocityX(160+50);
+            player.anims.play('right', true);
+        }
+           else{
+            player.setVelocityX(+50);
+           }
+            
+        }
+    }
+</script>
+
+</body>
+</html>
